@@ -32,10 +32,10 @@ parser.add_argument('--tts-volume', type=int, default=80)
 parser.add_argument('--secret-key', default=None)
 parser.add_argument('--turn-delay', type=float, default=0.4)
 parser.add_argument('--straight-delay', type=float, default=0.5)
-parser.add_argument('--driving-speed', type=int, default=90)
-parser.add_argument('--day-speed', type=int, default=255)
-parser.add_argument('--night-speed', type=int, default=255)
-parser.add_argument('--turning-speed', type=int, default=250)
+parser.add_argument('--driving-speed', type=int, default=50)
+parser.add_argument('--day-speed', type=int, default=100)
+parser.add_argument('--night-speed', type=int, default=100)
+parser.add_argument('--turning-speed', type=int, default=150)
 parser.add_argument('--forward', default='[-1,1,-1,1]')
 parser.add_argument('--left', default='[1,1,1,1]')
 parser.add_argument('--festival-tts', dest='festival_tts', action='store_true')
@@ -179,10 +179,19 @@ print(url)
 response = requests.request("GET", url)
 json_data = json.loads(response.text)
 print("owner:",json_data['owner'])
-      
+
+headlightsIONumber=5
+headlightsStatus=True
+headlightsLastFlip=datetime.datetime.now()
+
+
+
 if commandArgs.type == 'motor_hat':
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(chargeIONumber, GPIO.IN)
+
+    GPIO.setup(headlightsIONumber, GPIO.OUT)
+
 if commandArgs.type == 'l298n':
     mode=GPIO.getmode()
     print " mode ="+str(mode)
@@ -379,15 +388,62 @@ nightTimeDrivingSpeedActuallyUsed = commandArgs.night_speed
 
 # Initialise the PWM device
 if commandArgs.type == 'motor_hat':
-    pwm = PWM(0x42)
+    pwm = PWM(0x60)
 elif commandArgs.type == 'adafruit_pwm':
-    pwm = PWM(0x40) 
+    pwm = PWM(0x60) 
 
 # Note if you'd like more debug output you can instead run:
 #pwm = PWM(0x40, debug=True)
 servoMin = [150, 150, 130]  # Min pulse length out of 4096
 servoMax = [600, 600, 270]  # Max pulse length out of 4096
 armServo = [300, 300, 300]
+
+
+
+def centerServo(name):
+    servoDict[name]['pos'] = servoDict[name]['home']
+    pwm.setPWM(servoDict[name]['channel'], 0, servoDict[name]['home'])
+
+def centerViewServos():
+    centerServo('pan')
+    time.sleep(.5)
+    centerServo('tilt')
+    time.sleep(.5)
+
+def incrementServo(name, amount):
+    servoDict[name]['pos'] += amount
+
+    print name, " servo position: ", servoDict[name]['pos']
+
+    if servoDict[name]['pos'] >= servoDict[name]['max']:
+        servoDict[name]['pos'] = servoDict[name]['max']
+    if servoDict[name]['pos'] <= servoDict[name]['min']:
+        servoDict[name]['pos'] = servoDict[name]['min']
+    pwm.setPWM(servoDict[name]['channel'], 0, servoDict[name]['pos'])
+
+
+servoDict = {
+'tilt':{
+	'pos':280,
+	'home':280,
+	'max': 500, #up
+	'min': 190, #down
+	'channel': 14
+},
+'pan':{
+	'pos':330,
+	'home':330,
+	'max': 510, #left
+	'min': 120, #right
+	'channel': 15
+},
+'gripper':{
+	'pos':360,
+	'home':360,
+	'max': 460, #close
+	'min': 360, #open
+	'channel': 1
+} }
 
 #def setMotorsToIdle():
 #    s = 65
@@ -524,6 +580,11 @@ if commandArgs.type == 'motor_hat' or commandArgs.type == 'adafruit_pwm':
     pwm.setPWMFreq(60)                        # Set frequency to 60 Hz
 
 
+centerServo('gripper')
+time.sleep(.5)
+centerViewServos()
+
+
 WPA_FILE_TEMPLATE = """ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 country=GB
@@ -592,8 +653,6 @@ def configWifiLogin(secretKey):
 
 
 
-
-
 def incrementArmServo(channel, amount):
 
     armServo[channel] += amount
@@ -615,6 +674,7 @@ def times(lst, number):
 
 def runMotor(motorIndex, direction):
     motor = mh.getMotor(motorIndex+1)
+    print "drivingSpeed=",drivingSpeed
     if direction == 1:
         motor.setSpeed(drivingSpeed)
         motor.run(Adafruit_MotorHAT.FORWARD)
@@ -905,7 +965,7 @@ def handle_command(args):
         else:
             drivingSpeedActuallyUsed = dayTimeDrivingSpeedActuallyUsed
 
-                
+        drivingSpeedActuallyUsed=200
 
         global drivingSpeed
         global handlingCommand
@@ -980,6 +1040,32 @@ def handle_command(args):
                     setup_serial()
 
             if commandArgs.type == 'motor_hat' and motorsEnabled:
+                if command == 'headlights':
+                    #print "headlights cmd recvd"
+
+                    global headlightsIONumber
+                    global headlightsStatus
+                    global headlightsLastFlip
+
+                    headlightsLastFlipDelta = datetime.datetime.now() - headlightsLastFlip
+                    headlightSecondsElapsed = headlightsLastFlipDelta.total_seconds()
+
+                    #print "headlights delta ",headlightSecondsElapsed
+                    if headlightSecondsElapsed > .5:
+                        #print "headlights ignored"
+                    #else:
+
+                        headlightsLastFlip=datetime.datetime.now()
+
+                        if headlightsStatus == True:
+                            headlightsStatus = False
+                            print "lights on"
+                            GPIO.output(headlightsIONumber, GPIO.HIGH)
+                        else:
+                            headlightsStatus = True
+                            print "lights off"
+                            GPIO.output(headlightsIONumber, GPIO.LOW)
+
                 motorA.setSpeed(drivingSpeed)
                 motorB.setSpeed(drivingSpeed)
                 if command == 'F':
@@ -1005,22 +1091,44 @@ def handle_command(args):
                 if command == 'U':
                     #mhArm.getMotor(1).setSpeed(127)
                     #mhArm.getMotor(1).run(Adafruit_MotorHAT.BACKWARD)
-                    incrementArmServo(1, 10)
+                    #incrementArmServo(15, 10)
+                    incrementServo('tilt',10)
                     time.sleep(0.05)
                 if command == 'D':
                     #mhArm.getMotor(1).setSpeed(127)
                     #mhArm.getMotor(1).run(Adafruit_MotorHAT.FORWARD)
-                    incrementArmServo(1, -10)
+                    #incrementArmServo(15, -10)
+                    incrementServo('tilt',-10)
                     time.sleep(0.05)
                 if command == 'O':
                     #mhArm.getMotor(2).setSpeed(127)
                     #mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
-                    incrementArmServo(2, -10)
+                    #incrementArmServo(14, -10)
+                    incrementServo('pan',10)
                     time.sleep(0.05)
                 if command == 'C':
                     #mhArm.getMotor(2).setSpeed(127)
                     #mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)
-                    incrementArmServo(2, 10)
+                    #incrementArmServo(14, 10)
+                    incrementServo('pan',-10)
+                    time.sleep(0.05)
+                if command == 'GRIPO':
+                    #mhArm.getMotor(2).setSpeed(127)
+                    #mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
+                    #incrementArmServo(14, -10)
+                    incrementServo('gripper',-5)
+                    time.sleep(0.05)
+                if command == 'GRIPC':
+                    #mhArm.getMotor(2).setSpeed(127)
+                    #mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)
+                    #incrementArmServo(14, 10)
+                    incrementServo('gripper',5)
+                    time.sleep(0.05)
+                if command == 'CENTER':
+                    #mhArm.getMotor(2).setSpeed(127)
+                    #mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)
+                    #incrementArmServo(14, 10)
+                    centerViewServos()
                     time.sleep(0.05)
 
             if commandArgs.type == 'mdd10':
@@ -1321,7 +1429,7 @@ appServerSocketIO.on('end_reverse_ssh_8872381747239', endReverseSshProcess)
 if commandArgs.type == 'motor_hat':
     if motorsEnabled:
         # create a default object, no changes to I2C address or frequency
-        mh = Adafruit_MotorHAT(addr=0x60)
+        mh = Adafruit_MotorHAT(addr=0x60, freq =50)
         #mhArm = Adafruit_MotorHAT(addr=0x61)
     
 
@@ -1353,13 +1461,13 @@ def ipInfoUpdate():
 
 # true if it's on the charger and it needs to be charging
 def isCharging():
-    print "is charging current value", chargeValue
+    #print "is charging current value", chargeValue
 
     # only tested for motor hat robot currently, so only runs with that type
     if commandArgs.type == "motor_hat":
-        print "RPi.GPIO is in sys.modules"
+#        print "RPi.GPIO is in sys.modules"
         if chargeValue < 99: # if it's not full charged already
-            print "charge value is low"
+#            print "charge value is low"
             return GPIO.input(chargeIONumber) == 1 # return whether it's connected to the dock
 
     return False
@@ -1370,7 +1478,7 @@ def sendChargeState():
     charging = isCharging()
     chargeState = {'robot_id': robotID, 'charging': charging}
     appServerSocketIO.emit('charge_state', chargeState)
-    print "charge state:", chargeState
+ #   print "charge state:", chargeState
 
 def sendChargeStateCallback(x):
     sendChargeState()
@@ -1415,7 +1523,7 @@ def updateChargeApproximation():
         file = open(path, 'r')
         try:
             chargeValue = float(file.read())
-            print "error reading float from file", path
+            #print "error reading float from file", path
         except:
             chargeValue = 0
         file.close()
@@ -1441,7 +1549,7 @@ def updateChargeApproximation():
     file.write(str(chargeValue))
     file.close()        
 
-    print "charge value updated to", chargeValue
+    #print "charge value updated to", chargeValue
 
     
 
