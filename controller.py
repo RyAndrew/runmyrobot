@@ -420,6 +420,8 @@ def incrementServo(name, amount):
     if servoDict[name]['pos'] <= servoDict[name]['min']:
         servoDict[name]['pos'] = servoDict[name]['min']
     pwm.setPWM(servoDict[name]['channel'], 0, servoDict[name]['pos'])
+    time.sleep(.2)
+    pwm.setPWM(servoDict[name]['channel'], 0, 4096)
 
 
 servoDict = {
@@ -579,6 +581,27 @@ def setServoPulse(channel, pulse):
 if commandArgs.type == 'motor_hat' or commandArgs.type == 'adafruit_pwm':
     pwm.setPWMFreq(60)                        # Set frequency to 60 Hz
 
+#enable full output on M4 to power servos
+#pwm.setPWM(6, 4096, 0) #AIN1
+#pwm.setPWM(5, 0, 4096) #AIN2
+pwm.setPWM(8, 0, 4096 ) #PWMA
+print "motor 4 on"
+
+if commandArgs.type == 'motor_hat':
+    if motorsEnabled:
+        # create a default object, no changes to I2C address or frequency
+        mh = Adafruit_MotorHAT(addr=0x60, freq =60)
+        #mhArm = Adafruit_MotorHAT(addr=0x61)
+
+#motor = mh.getMotor(3)
+#motor.setSpeed(255)
+#motor.run(Adafruit_MotorHAT.FORWARD )
+
+motor = mh.getMotor(4)
+#motor.setSpeed(255)
+motor.run(Adafruit_MotorHAT.FORWARD )
+
+pwm.setPWM(7, 0, 4096 ) #PWMA
 
 centerServo('gripper')
 time.sleep(.5)
@@ -1070,22 +1093,22 @@ def handle_command(args):
                 motorB.setSpeed(drivingSpeed)
                 if command == 'F':
                     drivingSpeed = drivingSpeedActuallyUsed
-                    for motorIndex in range(4):
+                    for motorIndex in range(2):
                         runMotor(motorIndex, forward[motorIndex])
                     time.sleep(straightDelay)
                 if command == 'B':
                     drivingSpeed = drivingSpeedActuallyUsed
-                    for motorIndex in range(4):
+                    for motorIndex in range(2):
                         runMotor(motorIndex, backward[motorIndex])
                     time.sleep(straightDelay)
                 if command == 'L':
                     drivingSpeed = turningSpeedActuallyUsed
-                    for motorIndex in range(4):
+                    for motorIndex in range(2):
                         runMotor(motorIndex, left[motorIndex])
                     time.sleep(turnDelay)
                 if command == 'R':
                     drivingSpeed = turningSpeedActuallyUsed
-                    for motorIndex in range(4):
+                    for motorIndex in range(2):
                         runMotor(motorIndex, right[motorIndex])
                     time.sleep(turnDelay)
                 if command == 'U':
@@ -1426,11 +1449,6 @@ appServerSocketIO.on('end_reverse_ssh_8872381747239', endReverseSshProcess)
 #  thread.start_new_thread(myWait, ())
 
 
-if commandArgs.type == 'motor_hat':
-    if motorsEnabled:
-        # create a default object, no changes to I2C address or frequency
-        mh = Adafruit_MotorHAT(addr=0x60, freq =50)
-        #mhArm = Adafruit_MotorHAT(addr=0x61)
     
 
 def turnOffMotors():
