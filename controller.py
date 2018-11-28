@@ -403,12 +403,14 @@ armServo = [300, 300, 300]
 def centerServo(name):
     servoDict[name]['pos'] = servoDict[name]['home']
     pwm.setPWM(servoDict[name]['channel'], 0, servoDict[name]['home'])
+    time.sleep(.2)
+    pwm.setPWM(servoDict[name]['channel'], 0, 4096)
 
 def centerViewServos():
     centerServo('pan')
-    time.sleep(.5)
+    time.sleep(.2)
     centerServo('tilt')
-    time.sleep(.5)
+    time.sleep(.2)
 
 def incrementServo(name, amount):
     servoDict[name]['pos'] += amount
@@ -579,18 +581,18 @@ def setServoPulse(channel, pulse):
 
 
 if commandArgs.type == 'motor_hat' or commandArgs.type == 'adafruit_pwm':
-    pwm.setPWMFreq(60)                        # Set frequency to 60 Hz
+    pwm.setPWMFreq(50)                        # Set frequency to 60 Hz
 
 #enable full output on M4 to power servos
 #pwm.setPWM(6, 4096, 0) #AIN1
 #pwm.setPWM(5, 0, 4096) #AIN2
-pwm.setPWM(8, 0, 4096 ) #PWMA
+pwm.setPWM(7, 4096, 0 ) #PWMA
 print "motor 4 on"
 
 if commandArgs.type == 'motor_hat':
     if motorsEnabled:
         # create a default object, no changes to I2C address or frequency
-        mh = Adafruit_MotorHAT(addr=0x60, freq =60)
+        mh = Adafruit_MotorHAT(addr=0x60, freq =50)
         #mhArm = Adafruit_MotorHAT(addr=0x61)
 
 #motor = mh.getMotor(3)
@@ -601,7 +603,7 @@ motor = mh.getMotor(4)
 #motor.setSpeed(255)
 motor.run(Adafruit_MotorHAT.FORWARD )
 
-pwm.setPWM(7, 0, 4096 ) #PWMA
+pwm.setPWM(7, 4096, 0 ) #PWMA
 
 centerServo('gripper')
 time.sleep(.5)
@@ -1139,13 +1141,13 @@ def handle_command(args):
                     #mhArm.getMotor(2).setSpeed(127)
                     #mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
                     #incrementArmServo(14, -10)
-                    incrementServo('gripper',-5)
+                    incrementServo('gripper',-10)
                     time.sleep(0.05)
                 if command == 'GRIPC':
                     #mhArm.getMotor(2).setSpeed(127)
                     #mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)
                     #incrementArmServo(14, 10)
-                    incrementServo('gripper',5)
+                    incrementServo('gripper',10)
                     time.sleep(0.05)
                 if command == 'CENTER':
                     #mhArm.getMotor(2).setSpeed(127)
@@ -1455,8 +1457,8 @@ def turnOffMotors():
     # pi hat motors
     mh.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
     mh.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
-    mh.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
-    mh.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
+    #mh.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
+    #mh.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
 
     
 def turnOffMotorsMDD10():    
