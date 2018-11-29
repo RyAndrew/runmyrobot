@@ -425,6 +425,12 @@ def incrementServo(name, amount):
     time.sleep(.2)
     pwm.setPWM(servoDict[name]['channel'], 0, 4096)
 
+motorSpeedDict = {
+	'current':120,
+	'home':120,
+	'max': 200, #up
+	'min': 20 #down
+}
 
 servoDict = {
 'tilt':{
@@ -445,7 +451,7 @@ servoDict = {
 	'pos':360,
 	'home':360,
 	'max': 460, #close
-	'min': 360, #open
+	'min': 320, #open
 	'channel': 1
 } }
 
@@ -676,6 +682,20 @@ def configWifiLogin(secretKey):
 
 
 
+def incrementSpeed(amount):
+    motorSpeedDict['current'] += amount
+
+    if motorSpeedDict['current'] >= motorSpeedDict['max']:
+        motorSpeedDict['current'] = motorSpeedDict['max']
+    if motorSpeedDict['current'] <= motorSpeedDict['min']:
+        motorSpeedDict['current'] = motorSpeedDict['min']
+
+    print "increment speed position: ", motorSpeedDict['current']
+
+    motor = mh.getMotor(1)
+    motor.setSpeed(motorSpeedDict['current'])
+    motor = mh.getMotor(2)
+    motor.setSpeed(motorSpeedDict['current'])
 
 
 def incrementArmServo(channel, amount):
@@ -699,18 +719,18 @@ def times(lst, number):
 
 def runMotor(motorIndex, direction):
     motor = mh.getMotor(motorIndex+1)
-    print "drivingSpeed=",drivingSpeed
+    #print "drivingSpeed=",drivingSpeed
     if direction == 1:
-        motor.setSpeed(drivingSpeed)
+        #motor.setSpeed(drivingSpeed)
         motor.run(Adafruit_MotorHAT.FORWARD)
     if direction == -1:
-        motor.setSpeed(drivingSpeed)
+        #motor.setSpeed(drivingSpeed)
         motor.run(Adafruit_MotorHAT.BACKWARD)
     if direction == 0.5:
-        motor.setSpeed(128)
+        #motor.setSpeed(128)
         motor.run(Adafruit_MotorHAT.FORWARD)
     if direction == -0.5:
-        motor.setSpeed(128)
+        #motor.setSpeed(128)
         motor.run(Adafruit_MotorHAT.BACKWARD)
 
 
@@ -978,7 +998,10 @@ def moveGoPiGo3(command):
 
 
     
-        
+motor = mh.getMotor(1)
+motor.setSpeed(motorSpeedDict['current'])
+motor = mh.getMotor(2)
+motor.setSpeed(motorSpeedDict['current']) 
                 
 def handle_command(args):
         now = datetime.datetime.now()
@@ -1091,25 +1114,25 @@ def handle_command(args):
                             print "lights off"
                             GPIO.output(headlightsIONumber, GPIO.LOW)
 
-                motorA.setSpeed(drivingSpeed)
-                motorB.setSpeed(drivingSpeed)
+                #motorA.setSpeed(drivingSpeed)
+                #motorB.setSpeed(drivingSpeed)
                 if command == 'F':
-                    drivingSpeed = drivingSpeedActuallyUsed
+                    #drivingSpeed = drivingSpeedActuallyUsed
                     for motorIndex in range(2):
                         runMotor(motorIndex, forward[motorIndex])
                     time.sleep(straightDelay)
                 if command == 'B':
-                    drivingSpeed = drivingSpeedActuallyUsed
+                    #drivingSpeed = drivingSpeedActuallyUsed
                     for motorIndex in range(2):
                         runMotor(motorIndex, backward[motorIndex])
                     time.sleep(straightDelay)
                 if command == 'L':
-                    drivingSpeed = turningSpeedActuallyUsed
+                    #drivingSpeed = turningSpeedActuallyUsed
                     for motorIndex in range(2):
                         runMotor(motorIndex, left[motorIndex])
                     time.sleep(turnDelay)
                 if command == 'R':
-                    drivingSpeed = turningSpeedActuallyUsed
+                    #drivingSpeed = turningSpeedActuallyUsed
                     for motorIndex in range(2):
                         runMotor(motorIndex, right[motorIndex])
                     time.sleep(turnDelay)
@@ -1154,6 +1177,12 @@ def handle_command(args):
                     #mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)
                     #incrementArmServo(14, 10)
                     centerViewServos()
+                    time.sleep(0.05)
+                if command == 'SU':
+                    incrementSpeed(20)
+                    time.sleep(0.05)
+                if command == 'SD':
+                    incrementSpeed(-20)
                     time.sleep(0.05)
 
             if commandArgs.type == 'mdd10':
