@@ -428,8 +428,8 @@ def incrementServo(name, amount):
 motorSpeedDict = {
 	'current':120,
 	'home':120,
-	'max': 200, #up
-	'min': 20 #down
+	'max': 240, #up
+	'min': 40 #down
 }
 
 servoDict = {
@@ -441,8 +441,8 @@ servoDict = {
 	'channel': 14
 },
 'pan':{
-	'pos':330,
-	'home':330,
+	'pos':340,
+	'home':340,
 	'max': 510, #left
 	'min': 120, #right
 	'channel': 15
@@ -1113,7 +1113,8 @@ def handle_command(args):
                             headlightsStatus = True
                             print "lights off"
                             GPIO.output(headlightsIONumber, GPIO.LOW)
-
+                            
+                    time.sleep(0.05)
                 #motorA.setSpeed(drivingSpeed)
                 #motorB.setSpeed(drivingSpeed)
                 if command == 'F':
