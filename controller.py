@@ -1482,11 +1482,25 @@ appServerSocketIO.on('end_reverse_ssh_8872381747239', endReverseSshProcess)
 
 
     
+turnOffMotorsAttemptNumber = 0
 
 def turnOffMotors():
     # pi hat motors
-    mh.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
-    mh.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
+    global turnOffMotorsAttemptNumber
+    turnOffMotorsAttemptNumber += 1
+    
+    print "turnOffMotors attempt #", turnOffMotorsAttemptNumber
+    try:
+        mh.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
+        mh.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
+    except IOError:
+        print "turnOffMOtors IOError Exception caught!"
+        print "trying again attempt #", turnOffMotorsAttemptNumber
+        sleep(1)
+        turnOffMotors()
+        return
+
+    turnOffMotorsAttemptNumber = 0
     #mh.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
     #mh.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
 
