@@ -1496,7 +1496,7 @@ def turnOffMotors():
     except IOError:
         print "turnOffMOtors IOError Exception caught!"
         print "trying again attempt #", turnOffMotorsAttemptNumber
-        sleep(1)
+        time.sleep(1)
         turnOffMotors()
         return
 
