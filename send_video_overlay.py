@@ -172,12 +172,15 @@ def startVideoCaptureLinux():
     if (robotSettings.saturation is not None):
         print "saturation"
         os.system("v4l2-ctl -c saturation={saturation}".format(saturation=robotSettings.saturation))
-
-    videoCommandLine1 = '/usr/local/bin/ffmpeg -f v4l2 -threads 4 -video_size {xres}x{yres} -i /dev/video{video_device_number} {rotation_option} -f mpegts -framerate 25 -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
-    videoCommandLine2 = 'ffmpeg -f v4l2 -thread_queue_size 64 -threads 4 -video_size {xres}x{yres} -i /dev/video{video_device_number} {rotation_option} -f fbdev -framerate 2 -i /dev/fb0 -filter_complex "[1:v]colorkey=0x000000:0.1:0.8[ckout];[0:v][ckout]overlay[out]" -map "[out]" -f mpegts -framerate 25 -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
+#-filter:v "crop=500:200:0:0" 
+#    videoCommandLine1 = '/usr/local/bin/ffmpeg -f v4l2 -threads 4 -video_size {xres}x{yres} -i /dev/video{video_device_number} {rotation_option} -f mpegts -framerate 25 -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
+    videoCommandLine1 = 'echo "this fails"'
+    videoCommandLine2 = 'ffmpeg -thread_queue_size 256 -threads 4 -f fbdev -framerate 20 -i /dev/fb0 -f mpegts -framerate 20 -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/1280/720/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
     try:
         subprocess.Popen("ffmpeg")
 	print "ffmpeg found at ffmpeg"
+	print "running videoCommandLine2"
+	print videoCommandLine2
 	return subprocess.Popen(shlex.split(videoCommandLine2))
     except:
         print "ffmpeg not found at ffmpeg"
