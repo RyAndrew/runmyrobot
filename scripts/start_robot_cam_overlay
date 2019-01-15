@@ -1,0 +1,8 @@
+#!/bin/bash
+# suggested use for this:
+# (1) Put in the id's for your robot, YOURROBOTID and YOURCAMERAID
+# (2) use sudo to create a crontab entry: @reboot /bin/bash /home/pi/start_robot
+
+cd /home/pi/runmyrobot
+python send_video_overlay.py RobotIdGoesHere 0 --kbps 1500 --stream-key VideoStreamKeyHere --audio-device-name C920 --pipe-audio --mic-channels 2
+
