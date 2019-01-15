@@ -1,0 +1,4 @@
+#!/bin/bash
+cd /home/pi/runmyrobot
+
+python controller.py RobotIdGoesHere --forward '[-1,-1,-1,-1]' --left '[1,-1,1,-1]' 
