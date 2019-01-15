@@ -718,20 +718,26 @@ def times(lst, number):
 
 
 def runMotor(motorIndex, direction):
-    motor = mh.getMotor(motorIndex+1)
-    #print "drivingSpeed=",drivingSpeed
-    if direction == 1:
-        #motor.setSpeed(drivingSpeed)
-        motor.run(Adafruit_MotorHAT.FORWARD)
-    if direction == -1:
-        #motor.setSpeed(drivingSpeed)
-        motor.run(Adafruit_MotorHAT.BACKWARD)
-    if direction == 0.5:
-        #motor.setSpeed(128)
-        motor.run(Adafruit_MotorHAT.FORWARD)
-    if direction == -0.5:
-        #motor.setSpeed(128)
-        motor.run(Adafruit_MotorHAT.BACKWARD)
+    try:
+        motor = mh.getMotor(motorIndex+1)
+        #print "drivingSpeed=",drivingSpeed
+        if direction == 1:
+            #motor.setSpeed(drivingSpeed)
+            motor.run(Adafruit_MotorHAT.FORWARD)
+        if direction == -1:
+            #motor.setSpeed(drivingSpeed)
+            motor.run(Adafruit_MotorHAT.BACKWARD)
+        if direction == 0.5:
+            #motor.setSpeed(128)
+            motor.run(Adafruit_MotorHAT.FORWARD)
+        if direction == -0.5:
+            #motor.setSpeed(128)
+            motor.run(Adafruit_MotorHAT.BACKWARD)
+
+    except IOError:
+        print "runMotor IOError Exception caught!"
+        time.sleep(1)
+        turnOffMotors()
 
 
 forward = json.loads(commandArgs.forward)
