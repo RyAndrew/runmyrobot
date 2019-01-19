@@ -422,8 +422,9 @@ def incrementServo(name, amount):
     if servoDict[name]['pos'] <= servoDict[name]['min']:
         servoDict[name]['pos'] = servoDict[name]['min']
     pwm.setPWM(servoDict[name]['channel'], 0, servoDict[name]['pos'])
-    time.sleep(.2)
-    pwm.setPWM(servoDict[name]['channel'], 0, 4096)
+    if name != "grippervertical":
+        time.sleep(.2)
+        pwm.setPWM(servoDict[name]['channel'], 0, 4096)
 
 motorSpeedDict = {
 	'current':120,
@@ -453,6 +454,13 @@ servoDict = {
 	'max': 460, #close
 	'min': 320, #open
 	'channel': 1
+},
+'grippervertical':{
+	'pos':320,
+	'home':320,
+	'max': 410, #down
+	'min': 170, #up
+	'channel': 0
 } }
 
 #def setMotorsToIdle():
@@ -611,6 +619,8 @@ motor.run(Adafruit_MotorHAT.FORWARD )
 
 pwm.setPWM(7, 4096, 0 ) #PWMA
 
+centerServo('grippervertical')
+time.sleep(.5)
 centerServo('gripper')
 time.sleep(.5)
 centerViewServos()
@@ -1178,6 +1188,18 @@ def handle_command(args):
                     #mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)
                     #incrementArmServo(14, 10)
                     incrementServo('gripper',10)
+                    time.sleep(0.05)
+                if command == 'GRIPU':
+                    #mhArm.getMotor(2).setSpeed(127)
+                    #mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
+                    #incrementArmServo(14, -10)
+                    incrementServo('grippervertical',-10)
+                    time.sleep(0.05)
+                if command == 'GRIPD':
+                    #mhArm.getMotor(2).setSpeed(127)
+                    #mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)
+                    #incrementArmServo(14, 10)
+                    incrementServo('grippervertical',10)
                     time.sleep(0.05)
                 if command == 'CENTER':
                     #mhArm.getMotor(2).setSpeed(127)
