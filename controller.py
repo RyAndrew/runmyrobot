@@ -407,6 +407,17 @@ def centerServo(name):
     pwm.setPWM(servoDict[name]['channel'], 0, 4096)
 
 def centerViewServos():
+    #turnAllServosOff(pwm)
+    turnAllServosOff(pwm)
+    time.sleep(.3)
+    centerServo('grippervertical')
+    turnAllServosOn(pwm)
+    time.sleep(.2)
+
+#    pwm.setPWMFreq(50)
+#    time.sleep(.05)
+#    time.sleep(.05)
+
     centerServo('pan')
     time.sleep(.2)
     centerServo('tilt')
@@ -435,8 +446,8 @@ motorSpeedDict = {
 
 servoDict = {
 'tilt':{
-	'pos':280,
-	'home':280,
+	'pos':340,
+	'home':340,
 	'max': 500, #up
 	'min': 190, #down
 	'channel': 14
@@ -451,7 +462,7 @@ servoDict = {
 'gripper':{
 	'pos':360,
 	'home':360,
-	'max': 460, #close
+	'max': 490, #close
 	'min': 320, #open
 	'channel': 1
 },
@@ -593,6 +604,11 @@ def setServoPulse(channel, pulse):
   pulse /= pulseLength
   pwm.setPWM(channel, 0, pulse)
 
+def turnAllServosOn(pwm):
+    pwm.setPWM(7, 4096, 0 ) #PWMA
+
+def turnAllServosOff(pwm):
+    pwm.setPWM(7, 0, 4096 ) #PWMA
 
 if commandArgs.type == 'motor_hat' or commandArgs.type == 'adafruit_pwm':
     pwm.setPWMFreq(50)                        # Set frequency to 60 Hz
@@ -600,7 +616,8 @@ if commandArgs.type == 'motor_hat' or commandArgs.type == 'adafruit_pwm':
 #enable full output on M4 to power servos
 #pwm.setPWM(6, 4096, 0) #AIN1
 #pwm.setPWM(5, 0, 4096) #AIN2
-pwm.setPWM(7, 4096, 0 ) #PWMA
+#pwm.setPWM(7, 4096, 0 ) #PWMA
+turnAllServosOn(pwm)
 print "motor 4 on"
 
 if commandArgs.type == 'motor_hat':
@@ -617,7 +634,8 @@ motor = mh.getMotor(4)
 #motor.setSpeed(255)
 motor.run(Adafruit_MotorHAT.FORWARD )
 
-pwm.setPWM(7, 4096, 0 ) #PWMA
+turnAllServosOn(pwm)
+
 
 centerServo('grippervertical')
 time.sleep(.5)
@@ -625,6 +643,7 @@ centerServo('gripper')
 time.sleep(.5)
 centerViewServos()
 
+#turnAllServosOn(pwm)
 
 WPA_FILE_TEMPLATE = """ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
@@ -1157,49 +1176,49 @@ def handle_command(args):
                     #mhArm.getMotor(1).setSpeed(127)
                     #mhArm.getMotor(1).run(Adafruit_MotorHAT.BACKWARD)
                     #incrementArmServo(15, 10)
-                    incrementServo('tilt',10)
+                    incrementServo('tilt',20)
                     time.sleep(0.05)
                 if command == 'D':
                     #mhArm.getMotor(1).setSpeed(127)
                     #mhArm.getMotor(1).run(Adafruit_MotorHAT.FORWARD)
                     #incrementArmServo(15, -10)
-                    incrementServo('tilt',-10)
+                    incrementServo('tilt',-20)
                     time.sleep(0.05)
                 if command == 'O':
                     #mhArm.getMotor(2).setSpeed(127)
                     #mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
                     #incrementArmServo(14, -10)
-                    incrementServo('pan',10)
+                    incrementServo('pan',20)
                     time.sleep(0.05)
                 if command == 'C':
                     #mhArm.getMotor(2).setSpeed(127)
                     #mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)
                     #incrementArmServo(14, 10)
-                    incrementServo('pan',-10)
+                    incrementServo('pan',-20)
                     time.sleep(0.05)
                 if command == 'GRIPO':
                     #mhArm.getMotor(2).setSpeed(127)
                     #mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
                     #incrementArmServo(14, -10)
-                    incrementServo('gripper',-10)
+                    incrementServo('gripper',-20)
                     time.sleep(0.05)
                 if command == 'GRIPC':
                     #mhArm.getMotor(2).setSpeed(127)
                     #mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)
                     #incrementArmServo(14, 10)
-                    incrementServo('gripper',10)
+                    incrementServo('gripper',20)
                     time.sleep(0.05)
                 if command == 'GRIPU':
                     #mhArm.getMotor(2).setSpeed(127)
                     #mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
                     #incrementArmServo(14, -10)
-                    incrementServo('grippervertical',-10)
+                    incrementServo('grippervertical',-20)
                     time.sleep(0.05)
                 if command == 'GRIPD':
                     #mhArm.getMotor(2).setSpeed(127)
                     #mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)
                     #incrementArmServo(14, 10)
-                    incrementServo('grippervertical',10)
+                    incrementServo('grippervertical',20)
                     time.sleep(0.05)
                 if command == 'CENTER':
                     #mhArm.getMotor(2).setSpeed(127)
