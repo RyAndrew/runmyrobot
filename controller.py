@@ -403,25 +403,22 @@ armServo = [300, 300, 300]
 def centerServo(name):
     servoDict[name]['pos'] = servoDict[name]['home']
     pwm.setPWM(servoDict[name]['channel'], 0, servoDict[name]['home'])
-    time.sleep(.2)
+    time.sleep(.4)
     pwm.setPWM(servoDict[name]['channel'], 0, 4096)
 
 def centerViewServos():
     #turnAllServosOff(pwm)
     turnAllServosOff(pwm)
-    time.sleep(.3)
+    time.sleep(.4)
     centerServo('grippervertical')
     turnAllServosOn(pwm)
-    time.sleep(.2)
 
 #    pwm.setPWMFreq(50)
 #    time.sleep(.05)
 #    time.sleep(.05)
 
     centerServo('pan')
-    time.sleep(.2)
     centerServo('tilt')
-    time.sleep(.2)
 
 def incrementServo(name, amount):
     servoDict[name]['pos'] += amount
@@ -446,15 +443,15 @@ motorSpeedDict = {
 
 servoDict = {
 'tilt':{
-	'pos':340,
-	'home':340,
+	'pos':320,
+	'home':320,
 	'max': 500, #up
 	'min': 190, #down
 	'channel': 14
 },
 'pan':{
-	'pos':340,
-	'home':340,
+	'pos':320,
+	'home':320,
 	'max': 510, #left
 	'min': 120, #right
 	'channel': 15
