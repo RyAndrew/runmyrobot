@@ -602,10 +602,20 @@ def setServoPulse(channel, pulse):
   pwm.setPWM(channel, 0, pulse)
 
 def turnAllServosOn(pwm):
-    pwm.setPWM(7, 4096, 0 ) #PWMA
+    pwm.setPWM(5, 4096, 0 ) #IC3 BIN1
+    pwm.setPWM(7, 4096, 0 ) #IC3 PWMB
+    print "motor 4 on - 5,7"
+    pwm.setPWM(2, 4096, 0 ) #IC3 PWMA
+    pwm.setPWM(3, 4096, 0 ) #IC3 AIN2
+    print "motor 3 on - 2,3"
 
 def turnAllServosOff(pwm):
-    pwm.setPWM(7, 0, 4096 ) #PWMA
+    pwm.setPWM(5, 0, 4096 ) #IC3 BIN1
+    pwm.setPWM(7, 0, 4096 ) #IC3 PWMB
+    print "motor 4 off - 5,7"
+    pwm.setPWM(2, 0, 4096 ) #IC3 PWMA
+    pwm.setPWM(3, 0, 4096 ) #IC3 AIN2
+    print "motor 3 off - 2,3"
 
 if commandArgs.type == 'motor_hat' or commandArgs.type == 'adafruit_pwm':
     pwm.setPWMFreq(50)                        # Set frequency to 60 Hz
@@ -615,7 +625,6 @@ if commandArgs.type == 'motor_hat' or commandArgs.type == 'adafruit_pwm':
 #pwm.setPWM(5, 0, 4096) #AIN2
 #pwm.setPWM(7, 4096, 0 ) #PWMA
 turnAllServosOn(pwm)
-print "motor 4 on"
 
 if commandArgs.type == 'motor_hat':
     if motorsEnabled:
